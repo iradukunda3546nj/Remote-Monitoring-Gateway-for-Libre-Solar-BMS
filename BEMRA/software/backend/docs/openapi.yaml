@@ -1,0 +1,340 @@
+openapi: 3.1.0
+info:
+  title: BEMRA Backend API
+  version: 1.0.0
+  summary: Read-only REST API for Libre Solar BMS telemetry collected by BEMRA gateways.
+  description: |
+    All measurement fields use the original Libre Solar ThingSet object names
+    (e.g. `rPackVoltage_V`). Units are part of the name and are also listed in
+    responses. The API is read-only; it never writes BMS configuration.
+
+    Timestamps are RFC 3339 / UTC. `observed_at` is the best available time
+    (BMS measurement > gateway receipt > publication > backend ingestion) and
+    `observed_at_source` says which one was used. Missing values are `null`;
+    objects the BMS did not report are listed in `not_reported`.
+  license:
+    name: Apache-2.0
+servers:
+  - url: http://localhost:3000
+    description: Local development
+security:
+  - ApiKey: []
+tags:
+  - name: system
+  - name: registry
+  - name: telemetry
+  - name: integrations
+
+paths:
+  /health:
+    get:
+      tags: [system]
+      summary: Liveness probe
+      security: []
+      responses:
+        '200': { description: Process is running }
+  /ready:
+    get:
+      tags: [system]
+      summary: Readiness probe (database reachable, migrations applied)
+      security: []
+      responses:
+        '200': { description: Ready }
+        '503': { description: Not ready }
+
+  /api/v1/sites:
+    get:
+      tags: [registry]
+      summary: List installation sites
+      responses:
+        '200':
+          description: Sites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Site' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/devices:
+    get:
+      tags: [registry]
+      summary: List BMS devices with their current site and gateway
+      parameters:
+        - name: site
+          in: query
+          schema: { $ref: '#/components/schemas/Identifier' }
+      responses:
+        '200':
+          description: Devices
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Device' } }
+
+  /api/v1/devices/{deviceId}:
+    parameters: [{ $ref: '#/components/parameters/DeviceId' }]
+    get:
+      tags: [registry]
+      summary: Device detail, site location, assignment history and latest metadata snapshot
+      responses:
+        '200': { description: Device detail }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/devices/{deviceId}/status:
+    parameters: [{ $ref: '#/components/parameters/DeviceId' }]
+    get:
+      tags: [telemetry]
+      summary: Connectivity, data freshness, BMS state and active error flags
+      responses:
+        '200': { description: Status }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/devices/{deviceId}/latest:
+    parameters: [{ $ref: '#/components/parameters/DeviceId' }]
+    get:
+      tags: [telemetry]
+      summary: Latest measurements with units, timestamps and freshness
+      responses:
+        '200':
+          description: Latest snapshot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      device_id: { type: string }
+                      measurements:
+                        type: object
+                        additionalProperties:
+                          type: object
+                          properties:
+                            value: {}
+                            unit: { type: [string, 'null'] }
+                            thingset_id: { type: [string, 'null'], example: '0x71' }
+                      not_reported: { type: array, items: { type: string } }
+                      bms_state: { $ref: '#/components/schemas/BmsState' }
+                      error_flags: { $ref: '#/components/schemas/ErrorFlags' }
+                      timestamps: { $ref: '#/components/schemas/Timestamps' }
+                      data_freshness: { $ref: '#/components/schemas/Freshness' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/devices/{deviceId}/thingset:
+    parameters: [{ $ref: '#/components/parameters/DeviceId' }]
+    get:
+      tags: [telemetry]
+      summary: Complete latest validated ThingSet measurement object, exactly as stored
+      responses:
+        '200': { description: ThingSet object }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/devices/{deviceId}/cells:
+    parameters: [{ $ref: '#/components/parameters/DeviceId' }]
+    get:
+      tags: [telemetry]
+      summary: Latest per-cell voltages plus the BMS-computed min/max/avg
+      responses:
+        '200': { description: Cell voltages }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/devices/{deviceId}/telemetry:
+    parameters: [{ $ref: '#/components/parameters/DeviceId' }]
+    get:
+      tags: [telemetry]
+      summary: Historical telemetry (raw, keyset-paginated, or time-bucketed aggregates)
+      description: |
+        Window is half-open `[from, to)`, default last 24 h, max 366 days.
+        `interval=raw` returns individual snapshots (paginate with `next_cursor`).
+        Other intervals return min/avg/max per bucket; empty buckets are omitted
+        and at most 5000 buckets are returned. Bitmaps/enums (rErrorFlags,
+        rBmsState, rBalancingStatus) are only selectable in raw mode.
+      parameters:
+        - { $ref: '#/components/parameters/From' }
+        - { $ref: '#/components/parameters/To' }
+        - name: interval
+          in: query
+          schema: { type: string, enum: [raw, 1m, 5m, 15m, 1h, 6h, 1d], default: raw }
+        - name: fields
+          in: query
+          description: Comma-separated ThingSet names, e.g. `rPackVoltage_V,rSOC_pct`
+          schema: { type: string }
+        - { $ref: '#/components/parameters/Order' }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 5000, default: 500 }
+        - { $ref: '#/components/parameters/Cursor' }
+        - name: include
+          in: query
+          description: '`thingset` adds the complete stored ThingSet object to each raw row'
+          schema: { type: string, enum: [thingset] }
+      responses:
+        '200': { description: Telemetry page }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/devices/{deviceId}/events:
+    parameters: [{ $ref: '#/components/parameters/DeviceId' }]
+    get:
+      tags: [telemetry]
+      summary: Events (fault raise/clear, state changes), default last 7 days
+      parameters:
+        - { $ref: '#/components/parameters/From' }
+        - { $ref: '#/components/parameters/To' }
+        - name: severity
+          in: query
+          schema: { type: string, enum: [critical, warning, info] }
+        - { $ref: '#/components/parameters/Order' }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 1000, default: 200 }
+        - { $ref: '#/components/parameters/Cursor' }
+      responses:
+        '200': { description: Events page }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /api/v1/integrations/home-assistant/devices/{deviceId}:
+    parameters: [{ $ref: '#/components/parameters/DeviceId' }]
+    get:
+      tags: [integrations]
+      summary: Flat latest state for Home Assistant RESTful sensors
+      description: Keys are ThingSet names plus `cell_<n>_V`, `bms_state_code`, `error_active`, `online`, `stale`, `observed_at`.
+      responses:
+        '200': { description: Flat state object (not wrapped in `data`) }
+
+  /api/v1/integrations/mpm/devices/{deviceId}/summary:
+    parameters: [{ $ref: '#/components/parameters/DeviceId' }]
+    get:
+      tags: [integrations]
+      summary: Aggregated battery summary for a MicroPowerManager adapter (PROVISIONAL)
+      description: Not yet validated against the official MicroPowerManager API.
+      parameters:
+        - name: interval
+          in: query
+          schema: { type: string, enum: [15m, hourly, daily], default: hourly }
+        - { $ref: '#/components/parameters/From' }
+        - { $ref: '#/components/parameters/To' }
+      responses:
+        '200': { description: Summary buckets }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /api/v1/openapi.yaml:
+    get: { tags: [system], summary: This document (YAML), responses: { '200': { description: OpenAPI YAML } } }
+  /api/v1/openapi.json:
+    get: { tags: [system], summary: This document (JSON), responses: { '200': { description: OpenAPI JSON } } }
+
+components:
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Required when API_KEYS is configured (always in production).
+  parameters:
+    DeviceId:
+      name: deviceId
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/Identifier' }
+    From:
+      name: from
+      in: query
+      schema: { type: string, format: date-time }
+      description: Inclusive start, RFC 3339 with offset
+    To:
+      name: to
+      in: query
+      schema: { type: string, format: date-time }
+      description: Exclusive end, RFC 3339 with offset (default now)
+    Order:
+      name: order
+      in: query
+      schema: { type: string, enum: [asc, desc], default: desc }
+    Cursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+      description: Opaque `next_cursor` from the previous page
+  responses:
+    BadRequest:
+      description: Invalid parameters
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    NotFound:
+      description: Unknown device or no data
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Unauthorized:
+      description: Missing or invalid API key
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+  schemas:
+    Identifier:
+      type: string
+      pattern: '^[a-z0-9][a-z0-9-]{1,62}$'
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: {}
+    Site:
+      type: object
+      properties:
+        site_id: { type: string }
+        name: { type: string }
+        country_code: { type: [string, 'null'] }
+        region: { type: [string, 'null'] }
+        district: { type: [string, 'null'] }
+        installation_description: { type: [string, 'null'] }
+        address: { type: [string, 'null'] }
+        latitude: { type: [number, 'null'] }
+        longitude: { type: [number, 'null'] }
+        device_count: { type: integer }
+    Device:
+      type: object
+      properties:
+        device_id: { type: string }
+        bms_model: { type: string }
+        firmware_version: { type: [string, 'null'] }
+        cell_count: { type: [integer, 'null'] }
+        chemistry: { type: [string, 'null'] }
+        status: { type: string, enum: [active, inactive, decommissioned] }
+        site_id: { type: [string, 'null'] }
+        gateway_id: { type: [string, 'null'] }
+        last_seen_at: { type: [string, 'null'], format: date-time }
+    BmsState:
+      type: [object, 'null']
+      properties:
+        value: { type: integer, description: Raw rBmsState }
+        code: { type: string, enum: [OFF, CHG, DIS, NORMAL, SHUTDOWN, UNKNOWN] }
+        description: { type: string }
+    ErrorFlags:
+      type: [object, 'null']
+      properties:
+        value: { type: integer, description: Raw rErrorFlags (uint32) }
+        active: { type: array, items: { type: string } }
+        unknown_bits: { type: array, items: { type: integer } }
+    Timestamps:
+      type: object
+      properties:
+        measured_at: { type: [string, 'null'], format: date-time }
+        gateway_received_at: { type: [string, 'null'], format: date-time }
+        published_at: { type: [string, 'null'], format: date-time }
+        ingested_at: { type: string, format: date-time }
+        observed_at: { type: string, format: date-time }
+        observed_at_source: { type: string, enum: [bms, gateway, publish, backend] }
+        time_flags: { type: array, items: { type: string, enum: [no_gateway_clock, future_timestamp, late_delivery] } }
+    Freshness:
+      type: object
+      properties:
+        observed_at: { type: [string, 'null'], format: date-time }
+        age_s: { type: [integer, 'null'] }
+        stale: { type: boolean }
+        stale_after_s: { type: integer }

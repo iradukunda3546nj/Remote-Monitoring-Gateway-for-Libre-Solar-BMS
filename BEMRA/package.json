@@ -1,0 +1,8 @@
+{
+  "name": "bemra",
+  "private": true,
+  "description": "BEMRA: starts the ingestion worker, REST API and dashboard together for development",
+  "scripts": {
+    "start": "node scripts/dev-all.mjs"
+  }
+}

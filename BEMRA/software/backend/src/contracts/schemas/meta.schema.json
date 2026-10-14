@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemra.dev/schemas/v1/meta.schema.json",
+  "title": "BEMRA device metadata message (topic: meta, retained)",
+  "description": "ThingSet Device group, a read-only snapshot of the Conf group, and the provisioned pack layout. Published at gateway boot and whenever it changes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "device_id", "gateway_id", "site_id", "boot_id", "sequence", "timestamps", "device", "layout"],
+  "properties": {
+    "schema_version": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+    "device_id": { "$ref": "common.schema.json#/$defs/deviceIdentifier" },
+    "gateway_id": { "$ref": "common.schema.json#/$defs/identifier" },
+    "site_id": { "$ref": "common.schema.json#/$defs/identifier" },
+    "boot_id": { "$ref": "common.schema.json#/$defs/bootId" },
+    "sequence": { "$ref": "common.schema.json#/$defs/sequence" },
+    "timestamps": { "$ref": "common.schema.json#/$defs/timestamps" },
+    "device": {
+      "description": "ThingSet Device group (0x04) values",
+      "type": "object",
+      "properties": {
+        "cManufacturer": { "type": "string", "maxLength": 64 },
+        "cDeviceType": { "type": "string", "maxLength": 64 },
+        "cHardwareVersion": { "type": "string", "maxLength": 64 },
+        "cFirmwareVersion": { "type": "string", "maxLength": 64 }
+      },
+      "propertyNames": { "pattern": "^c[A-Z][A-Za-z0-9_]*$" },
+      "additionalProperties": { "type": "string", "maxLength": 128 }
+    },
+    "conf": {
+      "description": "Read-only snapshot of the ThingSet Conf group (0x05). Informational; BEMRA never writes configuration.",
+      "type": "object",
+      "propertyNames": { "pattern": "^s[A-Z][A-Za-z0-9]*(_[A-Za-z0-9]+)?$" },
+      "additionalProperties": {
+        "anyOf": [{ "type": "number" }, { "type": "array", "maxItems": 32, "items": { "type": "number" } }]
+      }
+    },
+    "layout": {
+      "description": "Provisioned pack layout. Determines how the gateway trims the firmware's fixed-size arrays.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cell_count", "thermistor_count"],
+      "properties": {
+        "cell_count": { "type": "integer", "minimum": 1, "maximum": 32 },
+        "thermistor_count": { "type": "integer", "minimum": 0, "maximum": 16 },
+        "chemistry": { "enum": ["LFP", "NMC", "LTO"] }
+      }
+    },
+    "gateway": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "model": { "type": "string", "maxLength": 64 },
+        "firmware_version": { "type": "string", "maxLength": 64 }
+      }
+    }
+  }
+}

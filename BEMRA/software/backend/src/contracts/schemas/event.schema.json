@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemra.dev/schemas/v1/event.schema.json",
+  "title": "BEMRA event message (topic: event)",
+  "description": "Raised/cleared conditions detected by the gateway, e.g. a change of rErrorFlags (codes BMS_ERR_*), rBmsState transitions (BMS_STATE_CHANGE) or gateway conditions (GATEWAY_*).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "device_id", "gateway_id", "site_id", "boot_id", "sequence", "timestamps", "event"],
+  "properties": {
+    "schema_version": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+    "device_id": { "$ref": "common.schema.json#/$defs/deviceIdentifier" },
+    "gateway_id": { "$ref": "common.schema.json#/$defs/identifier" },
+    "site_id": { "$ref": "common.schema.json#/$defs/identifier" },
+    "boot_id": { "$ref": "common.schema.json#/$defs/bootId" },
+    "sequence": { "$ref": "common.schema.json#/$defs/sequence" },
+    "timestamps": { "$ref": "common.schema.json#/$defs/timestamps" },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "state"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$" },
+        "severity": { "enum": ["critical", "warning", "info"] },
+        "state": { "enum": ["raised", "cleared", "instant"] },
+        "message": { "type": "string", "maxLength": 256 }
+      }
+    },
+    "thingset": {
+      "description": "Optional ThingSet measurement values at the time of the event (same rules as the telemetry thingset object).",
+      "type": "object",
+      "properties": {
+        "rErrorFlags": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "rBmsState": { "type": "integer", "minimum": 0, "maximum": 255 }
+      },
+      "propertyNames": { "$ref": "common.schema.json#/$defs/thingsetMeasName" },
+      "additionalProperties": { "$ref": "common.schema.json#/$defs/thingsetGenericValue" }
+    }
+  }
+}

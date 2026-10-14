@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "device_id": "bms-404",
+  "gateway_id": "gw-001",
+  "site_id": "site-001",
+  "boot_id": "b7f3a91c",
+  "sequence": 1052,
+  "timestamps": {
+    "measured_at": null,
+    "gateway_received_at": "2026-10-09T14:30:00Z",
+    "published_at": "2026-10-09T14:30:02Z"
+  },
+  "thingset": {
+    "rPackVoltage_V": 13.24,
+    "rStackVoltage_V": 13.22,
+    "rPackCurrent_A": -2.15,
+    "rCellTemps_degC": [26.8, 27.1],
+    "rICTemp_degC": 31.4,
+    "rMOSFETTemp_degC": 29.9,
+    "rSOC_pct": 78.5,
+    "rErrorFlags": 0,
+    "rBmsState": 3,
+    "rCellVoltages_V": [3.311, 3.302, 3.318, 3.309],
+    "rCellAvgVoltage_V": 3.31,
+    "rCellMinVoltage_V": 3.302,
+    "rCellMaxVoltage_V": 3.318,
+    "rBalancingStatus": 0
+  }
+}

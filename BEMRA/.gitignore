@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+coverage/
+*.pem
+*.key
+*.crt
+.DS_Store

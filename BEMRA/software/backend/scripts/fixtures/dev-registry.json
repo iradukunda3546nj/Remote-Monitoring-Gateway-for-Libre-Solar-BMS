@@ -1,0 +1,26 @@
+{
+  "_comment": "Development registry. Location values are placeholders; replace with the real installation before field use.",
+  "sites": [
+    {
+      "external_id": "site-001",
+      "name": "BEMRA development bench",
+      "country_code": "RW",
+      "region": "Kigali City",
+      "district": "Gasabo",
+      "installation_description": "Bench test rig: 4S1P LiFePO4 pack, LILYGO T-Call gateway",
+      "address": null,
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "gateways": [{ "external_id": "gw-001", "model": "LILYGO T-Call ESP32 SIM800L", "notes": "Development gateway" }],
+  "devices": [
+    {
+      "external_id": "bms-001",
+      "bms_model": "Libre Solar BMS C1",
+      "site": "site-001",
+      "gateway": "gw-001",
+      "assigned_from": "2026-01-01T00:00:00Z"
+    }
+  ]
+}

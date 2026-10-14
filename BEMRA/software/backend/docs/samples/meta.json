@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "device_id": "bms-001",
+  "gateway_id": "gw-001",
+  "site_id": "site-001",
+  "boot_id": "b7f3a91c",
+  "sequence": 1,
+  "timestamps": { "measured_at": null, "gateway_received_at": "2026-10-09T08:00:01Z", "published_at": "2026-10-09T08:00:02Z" },
+  "device": {
+    "cManufacturer": "Libre Solar",
+    "cDeviceType": "BMS-C1",
+    "cHardwareVersion": "v0.4",
+    "cFirmwareVersion": "v23.1"
+  },
+  "conf": {
+    "sNominalCapacity_Ah": 6.0,
+    "sCellOvervoltage_V": 3.65,
+    "sCellUndervoltage_V": 2.5,
+    "sDisMaxTemp_degC": 50.0,
+    "sChgMaxTemp_degC": 45.0,
+    "sBalTargetVoltageDiff_V": 0.01
+  },
+  "layout": { "cell_count": 4, "thermistor_count": 2, "chemistry": "LFP" },
+  "gateway": { "model": "LILYGO T-Call ESP32 SIM800L", "firmware_version": "0.1.0" }
+}

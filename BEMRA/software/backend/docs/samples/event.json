@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "device_id": "bms-001",
+  "gateway_id": "gw-001",
+  "site_id": "site-001",
+  "boot_id": "b7f3a91c",
+  "sequence": 1053,
+  "timestamps": { "measured_at": null, "gateway_received_at": "2026-10-09T14:30:05Z", "published_at": "2026-10-09T14:30:05Z" },
+  "event": { "code": "BMS_ERR_CELL_UNDERVOLTAGE", "severity": "critical", "state": "raised", "message": "rErrorFlags bit 0 set" },
+  "thingset": { "rErrorFlags": 1, "rBmsState": 1, "rCellMinVoltage_V": 2.49 }
+}

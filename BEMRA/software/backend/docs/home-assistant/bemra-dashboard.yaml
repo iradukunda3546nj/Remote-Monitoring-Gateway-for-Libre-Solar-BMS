@@ -1,0 +1,186 @@
+# BEMRA Monitoring: Home Assistant dashboard (built-in cards only, no HACS).
+# Paste via: dashboard → ✏ edit → ⋮ → Raw configuration editor.
+# Entities come from MQTT discovery published by the BEMRA backend.
+views:
+  - title: bms-001
+    path: bms-001
+    icon: mdi:battery-high
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Battery · bms-001
+            heading_style: title
+          - type: gauge
+            entity: sensor.bemra_bms_001_soc
+            name: State of charge
+            min: 0
+            max: 100
+            needle: true
+            severity:
+              green: 60
+              yellow: 30
+              red: 0
+            grid_options: { columns: 12, rows: 3 }
+          - type: tile
+            entity: sensor.bemra_bms_001_operating_mode
+            name: Operating mode
+          - type: tile
+            entity: binary_sensor.bemra_bms_001_fault
+            name: Protection fault
+          - type: tile
+            entity: sensor.bemra_bms_001_bms_state
+            name: BMS state
+          - type: tile
+            entity: sensor.bemra_bms_001_error_flags
+            name: Error flags
+      - type: grid
+        cards:
+          - type: heading
+            heading: Electrical
+            heading_style: title
+          - type: tile
+            entity: sensor.bemra_bms_001_pack_voltage
+            name: Pack voltage
+          - type: tile
+            entity: sensor.bemra_bms_001_pack_current
+            name: Pack current
+          - type: tile
+            entity: sensor.bemra_bms_001_power
+            name: Power
+          - type: tile
+            entity: sensor.bemra_bms_001_bms_ic_temperature
+            name: BMS IC temp
+          - type: tile
+            entity: sensor.bemra_bms_001_thermistor_1
+            name: Thermistor 1
+          - type: tile
+            entity: sensor.bemra_bms_001_thermistor_2
+            name: Thermistor 2
+      - type: grid
+        cards:
+          - type: heading
+            heading: Cells (4S)
+            heading_style: title
+          - type: tile
+            entity: sensor.bemra_bms_001_cell_1
+            name: Cell 1
+          - type: tile
+            entity: sensor.bemra_bms_001_cell_2
+            name: Cell 2
+          - type: tile
+            entity: sensor.bemra_bms_001_cell_3
+            name: Cell 3
+          - type: tile
+            entity: sensor.bemra_bms_001_cell_4
+            name: Cell 4
+          - type: tile
+            entity: sensor.bemra_bms_001_cell_spread
+            name: Cell spread (max − min)
+            grid_options: { columns: 12 }
+      - type: grid
+        column_span: 3
+        cards:
+          - type: heading
+            heading: Trends (6 h)
+            heading_style: title
+          - type: history-graph
+            title: Pack voltage & SOC
+            hours_to_show: 6
+            entities:
+              - entity: sensor.bemra_bms_001_pack_voltage
+              - entity: sensor.bemra_bms_001_soc
+            grid_options: { columns: 6, rows: 5 }
+          - type: history-graph
+            title: Pack current & power
+            hours_to_show: 6
+            entities:
+              - entity: sensor.bemra_bms_001_pack_current
+              - entity: sensor.bemra_bms_001_power
+            grid_options: { columns: 6, rows: 5 }
+          - type: history-graph
+            title: Cell voltages
+            hours_to_show: 6
+            entities:
+              - sensor.bemra_bms_001_cell_1
+              - sensor.bemra_bms_001_cell_2
+              - sensor.bemra_bms_001_cell_3
+              - sensor.bemra_bms_001_cell_4
+            grid_options: { columns: 12, rows: 5 }
+
+  - title: bms-002
+    path: bms-002
+    icon: mdi:battery-medium
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Battery · bms-002
+            heading_style: title
+          - type: gauge
+            entity: sensor.bemra_bms_002_soc
+            name: State of charge
+            min: 0
+            max: 100
+            needle: true
+            severity:
+              green: 60
+              yellow: 30
+              red: 0
+            grid_options: { columns: 12, rows: 3 }
+          - type: tile
+            entity: sensor.bemra_bms_002_operating_mode
+            name: Operating mode
+          - type: tile
+            entity: binary_sensor.bemra_bms_002_fault
+            name: Protection fault
+          - type: tile
+            entity: sensor.bemra_bms_002_pack_voltage
+            name: Pack voltage
+          - type: tile
+            entity: sensor.bemra_bms_002_pack_current
+            name: Pack current
+          - type: tile
+            entity: sensor.bemra_bms_002_power
+            name: Power
+          - type: tile
+            entity: sensor.bemra_bms_002_bms_ic_temperature
+            name: BMS IC temp
+      - type: grid
+        cards:
+          - type: heading
+            heading: Cells (8S)
+            heading_style: title
+          - { type: tile, entity: sensor.bemra_bms_002_cell_1, name: Cell 1 }
+          - { type: tile, entity: sensor.bemra_bms_002_cell_2, name: Cell 2 }
+          - { type: tile, entity: sensor.bemra_bms_002_cell_3, name: Cell 3 }
+          - { type: tile, entity: sensor.bemra_bms_002_cell_4, name: Cell 4 }
+          - { type: tile, entity: sensor.bemra_bms_002_cell_5, name: Cell 5 }
+          - { type: tile, entity: sensor.bemra_bms_002_cell_6, name: Cell 6 }
+          - { type: tile, entity: sensor.bemra_bms_002_cell_7, name: Cell 7 }
+          - { type: tile, entity: sensor.bemra_bms_002_cell_8, name: Cell 8 }
+          - type: tile
+            entity: sensor.bemra_bms_002_cell_spread
+            name: Cell spread (max − min)
+            grid_options: { columns: 12 }
+      - type: grid
+        cards:
+          - type: heading
+            heading: Trends (6 h)
+            heading_style: title
+          - type: history-graph
+            title: Pack voltage & SOC
+            hours_to_show: 6
+            entities:
+              - sensor.bemra_bms_002_pack_voltage
+              - sensor.bemra_bms_002_soc
+          - type: history-graph
+            title: Pack current & power
+            hours_to_show: 6
+            entities:
+              - sensor.bemra_bms_002_pack_current
+              - sensor.bemra_bms_002_power

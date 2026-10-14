@@ -1,0 +1,13 @@
+{
+  "sites": [],
+  "gateways": [{ "external_id": "gw-002", "model": "LILYGO T-Call ESP32 SIM800L", "notes": "Second development gateway" }],
+  "devices": [
+    {
+      "external_id": "bms-002",
+      "bms_model": "Libre Solar BMS C1",
+      "site": "site-001",
+      "gateway": "gw-002",
+      "assigned_from": "2026-01-01T00:00:00Z"
+    }
+  ]
+}

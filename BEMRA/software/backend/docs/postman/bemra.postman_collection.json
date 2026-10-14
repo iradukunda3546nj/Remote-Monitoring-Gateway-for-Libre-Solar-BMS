@@ -1,0 +1,569 @@
+{
+  "info": {
+    "name": "BEMRA Backend API v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "End-to-end verification requests. See docs/testing-e2e.md."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "apiKey",
+      "value": ""
+    },
+    {
+      "key": "deviceId",
+      "value": "bms-001"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 200\", () => pm.response.to.have.status(200));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ready",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/ready",
+          "host": ["{{baseUrl}}"],
+          "path": ["ready"],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"migrations applied\", () => pm.expect(pm.response.json().checks.migrations.ok).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sites",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/sites",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "sites"],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 200\", () => pm.response.to.have.status(200));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Devices",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/devices",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "devices"],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"bms-001 registered\", () => pm.expect(pm.response.json().data.map(d => d.device_id)).to.include(\"bms-001\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Device detail",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/devices/{{deviceId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "devices", "{{deviceId}}"],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 200\", () => pm.response.to.have.status(200));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Device status",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/devices/{{deviceId}}/status",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "devices", "{{deviceId}}", "status"],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 200\", () => pm.response.to.have.status(200));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Latest",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/devices/{{deviceId}}/latest",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "devices", "{{deviceId}}", "latest"],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"has pack voltage with unit\", () => { const m = pm.response.json().data.measurements.rPackVoltage_V; pm.expect(m.unit).to.eql(\"V\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ThingSet object",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/devices/{{deviceId}}/thingset",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "devices", "{{deviceId}}", "thingset"],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 200\", () => pm.response.to.have.status(200));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cells",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/devices/{{deviceId}}/cells",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "devices", "{{deviceId}}", "cells"],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 200\", () => pm.response.to.have.status(200));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Telemetry raw",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/devices/{{deviceId}}/telemetry?from=2026-10-09T00:00:00Z&to=2026-10-10T00:00:00Z&order=asc&limit=100",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "devices", "{{deviceId}}", "telemetry"],
+          "query": [
+            {
+              "key": "from",
+              "value": "2026-10-09T00:00:00Z"
+            },
+            {
+              "key": "to",
+              "value": "2026-10-10T00:00:00Z"
+            },
+            {
+              "key": "order",
+              "value": "asc"
+            },
+            {
+              "key": "limit",
+              "value": "100"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 200\", () => pm.response.to.have.status(200));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Telemetry 1h aggregate",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/devices/{{deviceId}}/telemetry?from=2026-10-09T00:00:00Z&to=2026-10-10T00:00:00Z&interval=1h&fields=rSOC_pct,rPackVoltage_V,rPackCurrent_A",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "devices", "{{deviceId}}", "telemetry"],
+          "query": [
+            {
+              "key": "from",
+              "value": "2026-10-09T00:00:00Z"
+            },
+            {
+              "key": "to",
+              "value": "2026-10-10T00:00:00Z"
+            },
+            {
+              "key": "interval",
+              "value": "1h"
+            },
+            {
+              "key": "fields",
+              "value": "rSOC_pct,rPackVoltage_V,rPackCurrent_A"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 200\", () => pm.response.to.have.status(200));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/devices/{{deviceId}}/events?from=2026-10-09T00:00:00Z&to=2026-10-10T00:00:00Z",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "devices", "{{deviceId}}", "events"],
+          "query": [
+            {
+              "key": "from",
+              "value": "2026-10-09T00:00:00Z"
+            },
+            {
+              "key": "to",
+              "value": "2026-10-10T00:00:00Z"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 200\", () => pm.response.to.have.status(200));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Home Assistant state",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/integrations/home-assistant/devices/{{deviceId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "integrations", "home-assistant", "devices", "{{deviceId}}"],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 200\", () => pm.response.to.have.status(200));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MPM hourly summary",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/integrations/mpm/devices/{{deviceId}}/summary?interval=hourly&from=2026-10-09T00:00:00Z&to=2026-10-10T00:00:00Z",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "integrations", "mpm", "devices", "{{deviceId}}", "summary"],
+          "query": [
+            {
+              "key": "interval",
+              "value": "hourly"
+            },
+            {
+              "key": "from",
+              "value": "2026-10-09T00:00:00Z"
+            },
+            {
+              "key": "to",
+              "value": "2026-10-10T00:00:00Z"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 200\", () => pm.response.to.have.status(200));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Unknown device (404)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/devices/bms-404/latest",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "devices", "bms-404", "latest"],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 404\", () => pm.response.to.have.status(404));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bad time range (400)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/devices/{{deviceId}}/telemetry?from=yesterday",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "devices", "{{deviceId}}", "telemetry"],
+          "query": [
+            {
+              "key": "from",
+              "value": "yesterday"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 400\", () => pm.response.to.have.status(400));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OpenAPI",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}",
+            "disabled": false
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/openapi.json",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "openapi.json"],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.test(\"status 200\", () => pm.response.to.have.status(200));"]
+          }
+        }
+      ]
+    }
+  ]
+}

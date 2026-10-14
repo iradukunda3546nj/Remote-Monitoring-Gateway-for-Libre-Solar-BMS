@@ -1,0 +1,26 @@
+/* BEMRA identity (Technical Brief cover): dark navy, white type, amber accent. */
+:root {
+  --bg: #0f141b;
+  --bg-grid: #161d26;
+  --panel: #141b24;
+  --panel-2: #19212c;
+  --border: #243040;
+  --border-strong: #33404f;
+
+  --text: #e6eaee;
+  --text-2: #b6c0ca;
+  --label: #7f8b97;
+  --faint: #56626f;
+
+  --amber: #e3a33a;
+  --amber-soft: rgba(227, 163, 58, 0.14);
+  --red: #e5534b;
+  --red-soft: rgba(229, 83, 75, 0.14);
+  --green: #3fb950;
+  --steel: #6f8fb0;
+
+  --font-sans: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Cascadia Mono', Consolas, monospace;
+  --radius: 6px;
+  --gap: 14px;
+}

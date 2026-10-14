@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bemra.dev/schemas/v1/status.schema.json",
+  "title": "BEMRA gateway status message (topic: gateways/{gateway}/status, retained, also the MQTT Last Will)",
+  "description": "Connectivity state of the ESP32 gateway. The Last Will is fixed at connect time, so it only carries identity and state=offline.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "gateway_id", "site_id", "state"],
+  "properties": {
+    "schema_version": { "$ref": "common.schema.json#/$defs/schemaVersion" },
+    "gateway_id": { "$ref": "common.schema.json#/$defs/identifier" },
+    "site_id": { "$ref": "common.schema.json#/$defs/identifier" },
+    "state": { "enum": ["online", "offline"] },
+    "boot_id": { "$ref": "common.schema.json#/$defs/bootId" },
+    "sequence": { "$ref": "common.schema.json#/$defs/sequence" },
+    "published_at": { "$ref": "common.schema.json#/$defs/timestampOrNull" },
+    "link": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "enum": ["wifi", "gprs", "lte", "ethernet", null] },
+        "rssi_dbm": { "type": ["integer", "null"], "minimum": -150, "maximum": 0 }
+      }
+    },
+    "uptime_s": { "type": "integer", "minimum": 0 },
+    "buffered_messages": { "type": "integer", "minimum": 0 },
+    "firmware_version": { "type": "string", "maxLength": 64 }
+  }
+}
