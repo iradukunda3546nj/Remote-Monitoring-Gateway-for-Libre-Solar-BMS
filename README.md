@@ -16,7 +16,7 @@
 
 ---
 
-## In one minute
+## Description
 
 A Libre Solar BMS in the field is a black box. It knows the state of charge, every cell
 voltage and every fault, but nobody can see any of that without driving to the site.
