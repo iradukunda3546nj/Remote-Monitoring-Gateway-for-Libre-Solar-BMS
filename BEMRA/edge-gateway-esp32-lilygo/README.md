@@ -26,11 +26,11 @@ The full description (state machine, design choices and test status) is in the
 
 | Contract feature | Firmware |
 |---|---|
-| `live` telemetry, QoS 1, retried until PUBACK | ✅ every 120 s |
-| `status` online (retained) + Last Will offline | ✅ on connect |
-| Array trimming to the connected cells/thermistors | ✅ |
-| Random `boot_id` per boot + per-boot `sequence` | ✅ |
-| Timestamps from a synced clock (NTP / GSM time) | ❌ sent as `null` |
-| Flash buffer + `replay` after an outage | ❌ |
-| `meta` at boot, `event` on fault changes, 15-min status heartbeat | ❌ |
-| TLS to the broker | ❌ (SIM800L limitation; plain port 1883) |
+| `live` telemetry, QoS 1, retried until PUBACK | Yes, every 120 s |
+| `status` online (retained) + Last Will offline | Yes, on connect |
+| Array trimming to the connected cells/thermistors | Yes |
+| Random `boot_id` per boot + per-boot `sequence` | Yes |
+| Timestamps from a synced clock (NTP / GSM time) | No, sent as `null` |
+| Flash buffer + `replay` after an outage | No |
+| `meta` at boot, `event` on fault changes, 15-min status heartbeat | No |
+| TLS to the broker | No (SIM800L limitation; plain port 1883) |

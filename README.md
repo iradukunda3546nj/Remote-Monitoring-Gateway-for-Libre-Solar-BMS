@@ -112,20 +112,20 @@ bench, not at a customer site.
 
 | Component | Status | Evidence |
 |---|---|---|
-| ThingSet BMS simulator (Python, serial) | ✅ Built | [`thingset_bms_sim.py`](BEMRA/edge-gateway-esp32-lilygo/simulator/thingset_bms_sim.py), bench runs with the ESP32 |
-| ESP32 + SIM800L gateway firmware | ✅ Built, compiles (332,624 B flash, 25 %) | [`bemra_gateway.ino`](BEMRA/edge-gateway-esp32-lilygo/firmware/bemra_gateway/bemra_gateway.ino) |
-| Gateway → broker over Airtel 2G (GPRS) | 🟡 Connection verified | Broker published the firmware's Last Will for boot `0c777ce8`; stored by the backend on 10 Oct 2026 ([details](docs/testing.md#5-cellular-transport)) |
-| Gateway telemetry stored end-to-end from GPRS | ⏳ Not yet captured | No telemetry row from a firmware boot ID is in the database yet ([why](docs/testing.md#5-cellular-transport)) |
-| MQTT contract v1 + JSON Schemas | ✅ Built | [`mqtt-contract.md`](BEMRA/software/backend/docs/mqtt-contract.md), 18 contract tests |
-| Ingestion worker → PostgreSQL | ✅ Built, tested | 9-step live end-to-end run, 59 automated tests |
-| REST API (read-only) + OpenAPI 3.1 | ✅ Built, tested; also deployed by the team on Render | [`openapi.yaml`](BEMRA/software/backend/docs/openapi.yaml), [Postman capture](#rest-api) |
-| Home Assistant MQTT auto-discovery | ✅ Built, used on a Raspberry Pi running Home Assistant OS | [`ha-discovery.js`](BEMRA/software/backend/src/integrations/ha-discovery.js), [photo](#home-assistant-auto-discovery) |
-| Web dashboard (React) | ✅ Built, tested | 17 tests, [screenshot](#web-dashboard) |
-| **MicroPowerManager** integration | 🟡 Provisional backend endpoint only | `/integrations/mpm/devices/{id}/summary` exists; **nothing has been written into MPM** and no MPM UI exists |
-| **Prospect (A2EI)** integration | ❌ Not started | The MQTT feed is ready for another subscriber; no adapter yet |
-| Physical Libre Solar BMS C1 on the UART | ❌ Not yet tested | All gateway runs so far used the simulator |
-| Offline buffering + `replay` on the gateway | ❌ Not in firmware | Supported by the contract and backend, not by the ESP32 code yet |
-| Continuous integration | ✅ Workflow added | [`.github/workflows/ci.yml`](.github/workflows/ci.yml): lint, format, tests (with a PostgreSQL service) and build for backend and frontend, plus a simulator smoke test. Every step was run locally; the workflow itself runs once it is pushed to GitHub. |
+| ThingSet BMS simulator (Python, serial) | Built | [`thingset_bms_sim.py`](BEMRA/edge-gateway-esp32-lilygo/simulator/thingset_bms_sim.py), bench runs with the ESP32 |
+| ESP32 + SIM800L gateway firmware | Built, compiles (332,624 B flash, 25 %) | [`bemra_gateway.ino`](BEMRA/edge-gateway-esp32-lilygo/firmware/bemra_gateway/bemra_gateway.ino) |
+| Gateway → broker over Airtel 2G (GPRS) | Connection verified | Broker published the firmware's Last Will for boot `0c777ce8`; stored by the backend on 10 Oct 2026 ([details](docs/testing.md#5-cellular-transport)) |
+| Gateway telemetry stored end-to-end from GPRS | Not yet captured | No telemetry row from a firmware boot ID is in the database yet ([why](docs/testing.md#5-cellular-transport)) |
+| MQTT contract v1 + JSON Schemas | Built | [`mqtt-contract.md`](BEMRA/software/backend/docs/mqtt-contract.md), 18 contract tests |
+| Ingestion worker → PostgreSQL | Built, tested | 9-step live end-to-end run, 59 automated tests |
+| REST API (read-only) + OpenAPI 3.1 | Built, tested; also deployed by the team on Render | [`openapi.yaml`](BEMRA/software/backend/docs/openapi.yaml), [Postman capture](#rest-api) |
+| Home Assistant MQTT auto-discovery | Built, used on a Raspberry Pi running Home Assistant OS | [`ha-discovery.js`](BEMRA/software/backend/src/integrations/ha-discovery.js), [photo](#home-assistant-auto-discovery) |
+| Web dashboard (React) | Built, tested | 17 tests, [screenshot](#web-dashboard) |
+| **MicroPowerManager** integration | Provisional backend endpoint only | `/integrations/mpm/devices/{id}/summary` exists; **nothing has been written into MPM** and no MPM UI exists |
+| **Prospect (A2EI)** integration | Not started | The MQTT feed is ready for another subscriber; no adapter yet |
+| Physical Libre Solar BMS C1 on the UART | Not yet tested | All gateway runs so far used the simulator |
+| Offline buffering + `replay` on the gateway | Not in firmware | Supported by the contract and backend, not by the ESP32 code yet |
+| Continuous integration | Workflow added | [`.github/workflows/ci.yml`](.github/workflows/ci.yml): lint, format, tests (with a PostgreSQL service) and build for backend and frontend, plus a simulator smoke test. Every step was run locally; the workflow itself runs once it is pushed to GitHub. |
 
 ### Against the challenge's expected outcomes
 
@@ -133,12 +133,12 @@ Each row quotes an expected outcome from the [challenge brief](https://github.co
 
 | Expected outcome | Where we are |
 |---|---|
-| **BMS simulator** that publishes representative BMS JSON to MQTT against the agreed schema | ✅ Two layers: [`thingset_bms_sim.py`](BEMRA/edge-gateway-esp32-lilygo/simulator/thingset_bms_sim.py) simulates the BMS *serial port*, so the real gateway is exercised, and `npm run mqtt:publish-sample` publishes schema-valid JSON straight to MQTT |
-| **Documented MQTT schema**, including Home Assistant auto-discovery | ✅ [Contract](BEMRA/software/backend/docs/mqtt-contract.md), JSON Schemas, [ThingSet mapping](BEMRA/software/backend/docs/thingset-mapping.md), discovery described [below](#home-assistant-auto-discovery) |
-| **MPM integration:** ingestion into MPM and a battery-health view in the asset UI | 🟡 Backend summary endpoint only; **no ingestion into MPM and no MPM UI** |
-| **Home Assistant integration** via auto-discovery | ✅ |
-| **One real transport path proven end-to-end** (A1 Wi-Fi, or A2 UART → cellular) against the shared real BMS, with the simulator as fallback | 🟡 A2-style path built (UART → ESP32 + SIM800L → 2G → broker). It is proven up to the broker MQTT session, using the simulator; not yet against the real BMS, and not yet as a stored telemetry row ([details](docs/testing.md#5-cellular-transport)) |
-| **Documentation:** setup and reproduction steps for a field-deployable kit | ✅ for the software and bench kit (this README, [test record](docs/testing.md), [e2e procedure](BEMRA/software/backend/docs/testing-e2e.md)). Field deployment (enclosure, power, antenna, private broker) is not documented yet. |
+| **BMS simulator** that publishes representative BMS JSON to MQTT against the agreed schema | Done. Two layers: [`thingset_bms_sim.py`](BEMRA/edge-gateway-esp32-lilygo/simulator/thingset_bms_sim.py) simulates the BMS *serial port*, so the real gateway is exercised, and `npm run mqtt:publish-sample` publishes schema-valid JSON straight to MQTT |
+| **Documented MQTT schema**, including Home Assistant auto-discovery | Done: [Contract](BEMRA/software/backend/docs/mqtt-contract.md), JSON Schemas, [ThingSet mapping](BEMRA/software/backend/docs/thingset-mapping.md), discovery described [below](#home-assistant-auto-discovery) |
+| **MPM integration:** ingestion into MPM and a battery-health view in the asset UI | Partial: backend summary endpoint only; **no ingestion into MPM and no MPM UI** |
+| **Home Assistant integration** via auto-discovery | Done |
+| **One real transport path proven end-to-end** (A1 Wi-Fi, or A2 UART → cellular) against the shared real BMS, with the simulator as fallback | Partial: A2-style path built (UART → ESP32 + SIM800L → 2G → broker). It is proven up to the broker MQTT session, using the simulator; not yet against the real BMS, and not yet as a stored telemetry row ([details](docs/testing.md#5-cellular-transport)) |
+| **Documentation:** setup and reproduction steps for a field-deployable kit | Done for the software and bench kit (this README, [test record](docs/testing.md), [e2e procedure](BEMRA/software/backend/docs/testing-e2e.md)). Field deployment (enclosure, power, antenna, private broker) is not documented yet. |
 
 ---
 
@@ -377,9 +377,9 @@ so a future breaking `v2` can run side by side with `v1` during a migration.
 
 | Topic kind | Built by our firmware today? | Accepted and stored by the backend? |
 |---|---|---|
-| `live` | ✅ | ✅ |
-| `status` + Last Will | ✅ | ✅ |
-| `meta`, `event`, `replay` | ❌ (roadmap) | ✅ (tested with sample payloads) |
+| `live` | Yes | Yes |
+| `status` + Last Will | Yes | Yes |
+| `meta`, `event`, `replay` | No (roadmap) | Yes (tested with sample payloads) |
 
 ### The live payload (exactly what the gateway sends: 401 bytes)
 
@@ -450,12 +450,12 @@ flowchart LR
 | Mechanism | What it protects against | Verified? |
 |---|---|---|
 | QoS 1 gateway → broker, message held in RAM until PUBACK | A lost publish on a flaky GPRS link | Implemented; failure path seen on the bench ("no PUBACK" → reconnect → re-send) |
-| PUBACK only after the PostgreSQL commit | Losing data when the database is down | ✅ DB outage test: no PUBACK sent, broker redelivered, row stored |
-| Unique key `(device_id, boot_id, sequence)` | Duplicates from redelivery | ✅ The same message published twice → one row |
-| `sequence_conflict` | A gateway bug that reuses a sequence for different data | ✅ 10 real conflicts caught during manual MQTTX testing |
-| Random `boot_id` per boot | Sequence restarting at 1 after a reboot | ✅ Different boot = different key space |
-| Retained Last Will | A gateway that silently disappears | ✅ The broker published our gateway's `offline` status |
-| Keep-alive tuned to the network | Idle connections being cut by the path | ✅ Measured; see below |
+| PUBACK only after the PostgreSQL commit | Losing data when the database is down | Yes. DB outage test: no PUBACK sent, broker redelivered, row stored |
+| Unique key `(device_id, boot_id, sequence)` | Duplicates from redelivery | Yes. The same message published twice → one row |
+| `sequence_conflict` | A gateway bug that reuses a sequence for different data | Yes: 10 real conflicts caught during manual MQTTX testing |
+| Random `boot_id` per boot | Sequence restarting at 1 after a reboot | Yes: Different boot = different key space |
+| Retained Last Will | A gateway that silently disappears | Yes. The broker published our gateway's `offline` status |
+| Keep-alive tuned to the network | Idle connections being cut by the path | Yes: measured, see below |
 
 ### Failure cases and what the system does
 
@@ -682,18 +682,18 @@ Here is the summary:
 
 | # | What was tested | How | Result |
 |---|---|---|---|
-| 1 | Contract, topics, decoding, config, query validation | `npm test` (unit) | ✅ part of 59/59 |
-| 2 | MQTT → PostgreSQL ingestion and REST API | `npm test` (integration, real PostgreSQL) | ✅ part of 59/59 (15 Oct 2026) |
-| 3 | Live chain: publish → public broker (TLS) → worker → DB → API | 9 scripted messages: valid, duplicate, replay, event, 3 kinds of invalid | ✅ 9/9 as expected (9 Oct) |
-| 4 | Database outage during ingestion | Removed the DB connection mid-run | ✅ No PUBACK; broker redelivered; stored after recovery |
-| 5 | Worker killed (`kill -9`) on a local broker | 2 messages published while it was down | ✅ Both stored after restart |
-| 6 | Keep-alive | 3 clients × 5 min at 60 s and 30 s | ✅ 60 s dropped at 60.8 s / 123.5 s; 30 s stable |
-| 7 | Simulator → ESP32 over UART | Bench, COM3, gateway log on the same console | ✅ Observed: reports parsed and turned into messages (console logs not archived) |
-| 8 | ESP32 → broker over Airtel 2G | Bench | 🟡 MQTT session established (Last Will for boot `0c777ce8` stored); a stored telemetry row from the GPRS path is **not yet captured** |
-| 9 | Home Assistant discovery | Unit tests + HA OS 18.3 on a Raspberry Pi | ✅ Entities created and updating from the shared feed (test payloads) |
-| 10 | Web dashboard | `vitest` (17 tests incl. API integration with mocks) + manual | ✅ 17/17; stale handling seen on a real capture |
-| 11 | Hosted API | Postman against the Render deployment | ✅ `200 OK` for `/api/v1/openapi.json` |
-| 12 | Physical BMS C1 | n/a | ❌ Not yet done |
+| 1 | Contract, topics, decoding, config, query validation | `npm test` (unit) | Passed (part of 59/59) |
+| 2 | MQTT → PostgreSQL ingestion and REST API | `npm test` (integration, real PostgreSQL) | Passed (part of 59/59, 15 Oct 2026) |
+| 3 | Live chain: publish → public broker (TLS) → worker → DB → API | 9 scripted messages: valid, duplicate, replay, event, 3 kinds of invalid | Passed: 9/9 as expected (9 Oct) |
+| 4 | Database outage during ingestion | Removed the DB connection mid-run | Passed: No PUBACK; broker redelivered; stored after recovery |
+| 5 | Worker killed (`kill -9`) on a local broker | 2 messages published while it was down | Passed: Both stored after restart |
+| 6 | Keep-alive | 3 clients × 5 min at 60 s and 30 s | Passed: 60 s dropped at 60.8 s / 123.5 s; 30 s stable |
+| 7 | Simulator → ESP32 over UART | Bench, COM3, gateway log on the same console | Observed: reports parsed and turned into messages (console logs not archived) |
+| 8 | ESP32 → broker over Airtel 2G | Bench | Partial: MQTT session established (Last Will for boot `0c777ce8` stored); a stored telemetry row from the GPRS path is **not yet captured** |
+| 9 | Home Assistant discovery | Unit tests + HA OS 18.3 on a Raspberry Pi | Passed: Entities created and updating from the shared feed (test payloads) |
+| 10 | Web dashboard | `vitest` (17 tests incl. API integration with mocks) + manual | Passed: 17/17; stale handling seen on a real capture |
+| 11 | Hosted API | Postman against the Render deployment | Passed: `200 OK` for `/api/v1/openapi.json` |
+| 12 | Physical BMS C1 | n/a | Not yet done |
 
 Messages are rejected loudly, not silently. While we were testing by hand, the database collected
 18 rejected messages with 6 different reasons: 10 × `sequence_conflict` (we reused sequence
@@ -935,7 +935,7 @@ Deeper documentation:
 | Priority | Item | Why |
 |---|---|---|
 | 1 | Connect the physical BMS C1 on a dedicated UART | Close the biggest remaining gap |
-| 2 | Capture a full GPRS → database run and add it to [docs/testing.md](docs/testing.md) | Turn 🟡 into ✅ |
+| 2 | Capture a full GPRS → database run and add it to [docs/testing.md](docs/testing.md) | Move this row from partial to verified |
 | 3 | Gateway clock (GSM network time / NTP), flash buffer + `replay`, `meta` at boot, `event` on fault changes, 15-min status heartbeat | Use the parts of the contract the server already supports |
 | 4 | Private Mosquitto with auth + ACL | Real security and real offline queueing |
 | 5 | MicroPowerManager adapter writing the summary into MPM's asset view | Challenge deliverable |

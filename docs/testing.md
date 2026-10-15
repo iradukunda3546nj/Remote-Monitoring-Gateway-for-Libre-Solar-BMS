@@ -50,15 +50,15 @@ the same payloads as in MQTTX.
 
 | Step | Published | Expected | Observed |
 |---|---|---|---|
-| a | `status` online (retained) | stored | ✅ `gateway_status` row |
-| b | `meta` (retained) | stored, device updated | ✅ firmware v23.1, 4 cells, 2 thermistors, LFP, 6 Ah |
-| c | `live` seq 1052 | stored | ✅ `telemetry` + 4 `cell_measurements` |
-| d | the same `live` again | duplicate, no new row | ✅ |
-| e | `replay` seq 1040 | stored as replay | ✅ `delivery = replay` |
-| f | `event` | stored | ✅ `BMS_ERR_CELL_UNDERVOLTAGE`, critical |
-| g | `rBmsState` as a string | rejected | ✅ `schema_violation` |
-| h | `{not json` | rejected | ✅ `invalid_json` |
-| i | device `bms-404` | rejected | ✅ `unknown_device` |
+| a | `status` online (retained) | stored | `gateway_status` row |
+| b | `meta` (retained) | stored, device updated | firmware v23.1, 4 cells, 2 thermistors, LFP, 6 Ah |
+| c | `live` seq 1052 | stored | `telemetry` + 4 `cell_measurements` |
+| d | the same `live` again | duplicate, no new row | As expected |
+| e | `replay` seq 1040 | stored as replay | `delivery = replay` |
+| f | `event` | stored | `BMS_ERR_CELL_UNDERVOLTAGE`, critical |
+| g | `rBmsState` as a string | rejected | `schema_violation` |
+| h | `{not json` | rejected | `invalid_json` |
+| i | device `bms-404` | rejected | `unknown_device` |
 
 SQL check: the stored `thingset` was deep-equal to the published object. The API returned the
 `live` sample (14:30Z) as latest, not the older `replay` (14:18Z), and a 1 h aggregate held both samples.
@@ -104,8 +104,8 @@ because repeated `err -3` (TCP connect failed) meant the SIM800L's socket was st
 | Check | Evidence | Status |
 |---|---|---|
 | Modem init, network registration, GPRS attach on Airtel Rwanda (APN `internet`) | Gateway console during bench sessions (not archived) | Observed |
-| MQTT session from the gateway to `test.mosquitto.org:1883` | The backend stored a retained **`offline`** status for `gw-001` with `boot_id` **`0c777ce8`** on 10 Oct 2026. That ID is in the firmware's random 8-hex format, and the payload has exactly the 5 fields of the firmware's `statusJson()`. The broker only publishes a Last Will for a client that had connected, so this proves a cellular MQTT session. | ✅ Verified |
-| Telemetry from the gateway stored by the backend | The database holds no telemetry row with a firmware-generated `boot_id`. All telemetry rows so far have boot IDs from the samples (`b7f3a91c`) or hand-written MQTTX tests (`mqttx0001`, `mqttx0002`). On 10 Oct the backend's persistent-session problem (section 3) meant it received nothing during the gateway runs. | ⏳ **Not yet captured** |
+| MQTT session from the gateway to `test.mosquitto.org:1883` | The backend stored a retained **`offline`** status for `gw-001` with `boot_id` **`0c777ce8`** on 10 Oct 2026. That ID is in the firmware's random 8-hex format, and the payload has exactly the 5 fields of the firmware's `statusJson()`. The broker only publishes a Last Will for a client that had connected, so this proves a cellular MQTT session. | Verified |
+| Telemetry from the gateway stored by the backend | The database holds no telemetry row with a firmware-generated `boot_id`. All telemetry rows so far have boot IDs from the samples (`b7f3a91c`) or hand-written MQTTX tests (`mqttx0001`, `mqttx0002`). On 10 Oct the backend's persistent-session problem (section 3) meant it received nothing during the gateway runs. | **Not yet captured** |
 
 **To close this gap:** run `npm start`, start the simulator against the flashed gateway, and wait for two
 publish cycles. Then run this query and add the output here:
@@ -117,9 +117,9 @@ publish cycles. Then run this query and add the output here:
 
 | Check | Evidence | Status |
 |---|---|---|
-| Discovery configs (entities, templates, availability, `expire_after`, private prefix) | Unit tests in `tests/unit/ha-discovery.test.js` | ✅ |
-| HA picks up the device and updates from the shared broker | Home Assistant OS 18.3 on a Raspberry Pi; a dashboard on a tablet (photo in the README, 10 Oct 15:35) shows SOC 90 % and 24 V, which match the MQTTX test message `mqttx0002` #7 stored by the backend at 15:29 | ✅ with test payloads |
-| HA updated by gateway telemetry over GPRS | — | ⏳ Same gap as section 5 |
+| Discovery configs (entities, templates, availability, `expire_after`, private prefix) | Unit tests in `tests/unit/ha-discovery.test.js` | Verified |
+| HA picks up the device and updates from the shared broker | Home Assistant OS 18.3 on a Raspberry Pi; a dashboard on a tablet (photo in the README, 10 Oct 15:35) shows SOC 90 % and 24 V, which match the MQTTX test message `mqttx0002` #7 stored by the backend at 15:29 | Verified with test payloads |
+| HA updated by gateway telemetry over GPRS | — | Pending: same gap as section 5 |
 
 <img src="images/home-assistant-os-console.jpg" alt="Home Assistant OS 18.3 console on the Raspberry Pi" width="520">
 
@@ -129,9 +129,9 @@ publish cycles. Then run this query and add the output here:
 
 | Check | Evidence | Status |
 |---|---|---|
-| Endpoints answer with correct data and codes | Integration tests; 13 requests from the Postman collection run over HTTP (9 Oct); responses re-captured for the README on 15 Oct | ✅ |
-| Hosted deployment | Postman `GET https://bemra-backend.onrender.com/api/v1/openapi.json` with an API key → `200 OK`, 3.49 KB, 22.26 s (likely a cold start) | ✅ |
-| Dashboard renders real API data and flags stale data | Headless Edge capture against the local API on 15 Oct: values greyed out, `STALE`, `NOT LIVE`, gateway "no recent data" | ✅ |
+| Endpoints answer with correct data and codes | Integration tests; 13 requests from the Postman collection run over HTTP (9 Oct); responses re-captured for the README on 15 Oct | Verified |
+| Hosted deployment | Postman `GET https://bemra-backend.onrender.com/api/v1/openapi.json` with an API key → `200 OK`, 3.49 KB, 22.26 s (likely a cold start) | Verified |
+| Dashboard renders real API data and flags stale data | Headless Edge capture against the local API on 15 Oct: values greyed out, `STALE`, `NOT LIVE`, gateway "no recent data" | Verified |
 
 ---
 

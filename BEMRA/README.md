@@ -4,9 +4,9 @@ Open remote monitoring for **Libre Solar BMS C1** batteries (OSEAS 2026 hackatho
 **Start with the [project README](../README.md)**: architecture, MQTT contract, test results and setup.
 
 ```text
-Libre Solar BMS C1 (or simulator) ──ThingSet/UART──▶ LILYGO T-Call ESP32 + SIM800L ──MQTT over GPRS──▶ Mosquitto
-     ──▶ Node.js ingestion worker ──▶ PostgreSQL ──▶ REST API ──▶ Web dashboard
-     Mosquitto ──▶ Home Assistant (MQTT discovery)
+Libre Solar BMS C1 (or simulator) ──ThingSet/UART──> LILYGO T-Call ESP32 + SIM800L ──MQTT over GPRS──> Mosquitto
+     ──> Node.js ingestion worker ──> PostgreSQL ──> REST API ──> Web dashboard
+     Mosquitto ──> Home Assistant (MQTT discovery)
 ```
 
 | Folder | Contents |
