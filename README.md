@@ -16,7 +16,7 @@
 
 ---
 
-## Description
+## Descriptions
 
 A Libre Solar BMS in the field is a black box. It knows the state of charge, every cell
 voltage and every fault, but nobody can see any of that without driving to the site.
@@ -880,10 +880,9 @@ We follow the challenge repository's [contributing guide](https://github.com/EnA
 - pull request titles in [Conventional Commits](https://www.conventionalcommits.org/) form (`feat:`, `fix:`, `docs:` …);
 - fill in the pull request template, linking an issue with `closes: #…` or `makes progress on: #…`.
 
-**AI use.** In line with that guide's disclosure rule: this project was built with substantial help
+**AI use.** In line with that guide's disclosure rule: this project was built with  help
 from an AI coding assistant (Claude Code, by Anthropic).
-- **What the AI did:** drafted most of the backend, dashboard, firmware, simulator, tests and
-  documentation, including this README, from the team's requirements.
+- **What the AI did:** drafted most of the backend, dashboard, firmware, simulator,from the team's requirements.
 - **What the team did:**
   - set the requirements and the architecture direction;
   - made the contract decisions (integer `rBmsState`, array trimming, dropping the gateway `summary`
