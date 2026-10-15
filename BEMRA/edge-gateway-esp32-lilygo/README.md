@@ -1,13 +1,36 @@
 # Edge gateway (LILYGO T-Call ESP32 + SIM800L)
 
-Not implemented yet. The gateway must implement the producer side of the
-[BEMRA MQTT contract v1](../software/backend/docs/mqtt-contract.md):
+The gateway reads Libre Solar ThingSet live reports from its serial port and publishes them over
+GPRS as `live` messages of the [BEMRA MQTT contract v1](../software/backend/docs/mqtt-contract.md).
+The full description (state machine, design choices and test status) is in the
+[project README](../../README.md#esp32-cellular-gateway-firmware).
 
-* parse the Libre Solar ThingSet live report from UART;
-* trim fixed-size arrays to the provisioned cell/thermistor count (declared in `meta`);
-* add `device_id`, `gateway_id`, `site_id`, a random `boot_id` per boot and a per-boot `sequence`;
-* fill `gateway_received_at` / `published_at` only once the clock is synchronised (NTP or GSM network time), otherwise `null`;
-* buffer to flash while offline and publish the backlog on `…/replay`;
-* set a retained Last Will on `…/gateways/{gateway_id}/status`.
+| Folder | Contents |
+|---|---|
+| [`firmware/bemra_gateway/`](firmware/bemra_gateway) | Arduino sketch. Edit [`config.h`](firmware/bemra_gateway/config.h) (IDs, APN, broker, cell count) before flashing. |
+| [`simulator/`](simulator) | [`thingset_bms_sim.py`](simulator/thingset_bms_sim.py): a stand-in for the BMS serial port (LiFePO4 model, ThingSet text mode) |
 
-Validate payloads against `software/backend/src/contracts/schemas/` before publishing.
+## Quick start
+
+1. Arduino IDE → board *ESP32 Dev Module* (ESP32 core 3.x). Libraries: TinyGSM, MQTT (Joel Gaehwiler), ArduinoJson 7.
+2. Open `firmware/bemra_gateway/bemra_gateway.ino`, check `config.h`, and flash it.
+3. Close the Serial Monitor, then run the simulator on the same port:
+   ```powershell
+   cd simulator
+   pip install -r requirements.txt
+   py thingset_bms_sim.py --port COM3
+   ```
+   Gateway log lines (`[gw] …`) appear in the same window.
+
+## Implemented vs. contract
+
+| Contract feature | Firmware |
+|---|---|
+| `live` telemetry, QoS 1, retried until PUBACK | ✅ every 120 s |
+| `status` online (retained) + Last Will offline | ✅ on connect |
+| Array trimming to the connected cells/thermistors | ✅ |
+| Random `boot_id` per boot + per-boot `sequence` | ✅ |
+| Timestamps from a synced clock (NTP / GSM time) | ❌ sent as `null` |
+| Flash buffer + `replay` after an outage | ❌ |
+| `meta` at boot, `event` on fault changes, 15-min status heartbeat | ❌ |
+| TLS to the broker | ❌ (SIM800L limitation; plain port 1883) |

@@ -1,0 +1,9 @@
+# Use this workspace to collaborate
+workspace:
+  id: ""
+
+localResources:
+  collections:
+    - ../BEMRA/software/backend/docs/postman/bemra.postman_collection.json
+  specs:
+    - ../BEMRA/software/backend/docs/openapi.yaml

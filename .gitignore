@@ -1,3 +1,6 @@
 /BEMRA_Technical_Brief.pdf
 /BEMRA_Technical_Brief_source.html
 /Libre Solar Bms.pdf
+# Raw photos/screenshots (contain an API key and the modem IMEI); redacted copies live in docs/images
+/setup-Images/
+__pycache__/

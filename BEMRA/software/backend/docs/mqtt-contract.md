@@ -15,13 +15,13 @@ test broker, use a unique namespace such as `bemra-dev-01092a`. A namespace
 reduces accidental collisions only. **It is not security**: anyone can read and
 publish on `test.mosquitto.org`.
 
-| Topic                                              | Purpose                                  | Publisher              | Subscribers            | QoS | Retain  | Frequency                  | Typical size                      |
-| -------------------------------------------------- | ---------------------------------------- | ---------------------- | ---------------------- | --- | ------- | -------------------------- | --------------------------------- |
-| `{root}/v1/{site_id}/{device_id}/live`             | ThingSet Meas snapshot                   | gateway                | backend, HA (optional) | 1   | no      | Wi‑Fi: 5 s · GPRS: 60 s    | ~590 B (4S), +~6 B per extra cell |
-| `{root}/v1/{site_id}/{device_id}/replay`           | Snapshots buffered while offline         | gateway                | backend                | 1   | no      | after reconnect, throttled | ~540–590 B each                   |
-| `{root}/v1/{site_id}/{device_id}/meta`             | Device group, Conf snapshot, pack layout | gateway                | backend, HA            | 1   | **yes** | boot + on change           | ~660 B (with 6 Conf values)       |
-| `{root}/v1/{site_id}/{device_id}/event`            | Fault raise/clear, state transitions     | gateway                | backend, HA            | 1   | no      | on change                  | ~430 B                            |
-| `{root}/v1/{site_id}/gateways/{gateway_id}/status` | Gateway online/offline, link quality     | gateway (+ broker LWT) | backend, HA            | 1   | **yes** | connect, every 15 min, LWT | ~260 B (LWT ~110 B)               |
+| Topic                                              | Purpose                                  | Publisher              | Subscribers            | QoS | Retain  | Frequency                                           | Typical size                      |
+| -------------------------------------------------- | ---------------------------------------- | ---------------------- | ---------------------- | --- | ------- | --------------------------------------------------- | --------------------------------- |
+| `{root}/v1/{site_id}/{device_id}/live`             | ThingSet Meas snapshot                   | gateway                | backend, HA (optional) | 1   | no      | Wi‑Fi: 5 s · GPRS: 60–120 s (BEMRA firmware: 120 s) | ~590 B (4S), +~6 B per extra cell |
+| `{root}/v1/{site_id}/{device_id}/replay`           | Snapshots buffered while offline         | gateway                | backend                | 1   | no      | after reconnect, throttled                          | ~540–590 B each                   |
+| `{root}/v1/{site_id}/{device_id}/meta`             | Device group, Conf snapshot, pack layout | gateway                | backend, HA            | 1   | **yes** | boot + on change                                    | ~660 B (with 6 Conf values)       |
+| `{root}/v1/{site_id}/{device_id}/event`            | Fault raise/clear, state transitions     | gateway                | backend, HA            | 1   | no      | on change                                           | ~430 B                            |
+| `{root}/v1/{site_id}/gateways/{gateway_id}/status` | Gateway online/offline, link quality     | gateway (+ broker LWT) | backend, HA            | 1   | **yes** | connect, every 15 min, LWT                          | ~260 B (LWT ~110 B)               |
 
 `gateways` is a reserved word: it can never be a `device_id`.
 
@@ -120,7 +120,7 @@ On connect, the gateway sets its Last Will to
   `replay` after reconnecting. That buffer's size limit is the real durability
   limit; overflow must be reported with a `GATEWAY_BUFFER_OVERFLOW` event.
 - Broker → backend: the worker uses a persistent session (`clean=false`, fixed
-  client id) and QoS 1 subscriptions, and sends PUBACK **only after the
+  client id; `MQTT_CLEAN_SESSION=true` switches to a clean session) and QoS 1 subscriptions, and sends PUBACK **only after the
   PostgreSQL transaction commits**. While the backend is down, the broker queues
   messages for the session. Queue limits are broker-specific.
   **Verified 2026-10-09:** `test.mosquitto.org` resumes the session
@@ -128,6 +128,9 @@ On connect, the gateway sets its Last Will to
   while the subscriber was offline. Use a private Mosquitto broker
   (`max_queued_messages`, `persistent_client_expiration`) for any test that
   depends on offline queueing. See [test-results.md](test-results.md).
+  **Verified 2026-10-10:** on `test.mosquitto.org` a persistent session stopped receiving
+  messages altogether while a clean session with the same filters received them, so the
+  development `.env` uses `MQTT_CLEAN_SESSION=true` there.
 - Redelivery creates duplicates, and the unique key absorbs them. Overall the
   system is **at-least-once with idempotent storage**. It is not exactly-once,
   and a message lost before it reaches the broker cannot be recovered by the backend.
