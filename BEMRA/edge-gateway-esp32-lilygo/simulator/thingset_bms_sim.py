@@ -7,7 +7,8 @@ Emits exactly what the BMS firmware prints on its ThingSet UART
 
     #mLive {"Meas":{"rPackVoltage_V":13.24,...,"rCellVoltages_V":[...16 values...]}}\r\n
 
-  * one live report on start, then every --interval seconds (default 120 s)
+  * one live report on start, then every --interval seconds (default 30 s,
+    matching PUBLISH_INTERVAL_MS in the gateway config.h)
   * field set identical to the BEMRA contract test payload (8 Meas values,
     one voltage per connected cell, one temperature per thermistor).
     The gateway adds the envelope (ids, boot_id, sequence) and publishes.
@@ -199,7 +200,7 @@ def main() -> int:
     ap.add_argument("--port", help="serial port of the ESP32 (e.g. COM5) or of a USB-TTL adapter")
     ap.add_argument("--baud", type=int, default=115200, help="ThingSet serial baud rate (default 115200)")
     ap.add_argument("--dry-run", action="store_true", help="print reports to the console, no serial port")
-    ap.add_argument("--interval", type=float, default=120.0, help="report period in s (default 120 = one report per gateway publish)")
+    ap.add_argument("--interval", type=float, default=30.0, help="report period in s (default 30 = one report per gateway publish)")
     ap.add_argument("--cells", type=int, default=4, choices=range(3, MAX_CELLS + 1), metavar="3-16")
     ap.add_argument("--capacity", type=float, default=6.0, help="nominal capacity in Ah (default 6)")
     ap.add_argument("--soc", type=float, default=70.0, help="initial SOC in %% (default 70)")

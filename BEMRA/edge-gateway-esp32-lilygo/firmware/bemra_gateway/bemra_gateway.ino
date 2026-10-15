@@ -3,7 +3,8 @@
  *
  * Reads ThingSet live reports from the BMS (or the Python simulator) on the USB
  * serial port:   #mLive {"Meas":{...}}
- * and publishes the newest one every 2 minutes over GPRS (MQTT contract v1):
+ * and publishes each one as it arrives, at most once per PUBLISH_INTERVAL_MS
+ * (30 s demo / 120 s deployment, see config.h) over GPRS (MQTT contract v1):
  *   <root>/v1/<site>/<device>/live            QoS 1
  *   <root>/v1/<site>/gateways/<gw>/status     QoS 1, retained, Last Will = offline
  *
@@ -230,10 +231,11 @@ void runConnection() {
 
 // ---------------------------------------------------------------- telemetry
 void runTelemetry() {
-  // Every PUBLISH_INTERVAL_MS (first one as soon as data and link exist),
-  // freeze the newest BMS reading into a message. Old readings are never repeated.
+  // Publish each new BMS reading as soon as it arrives (first one as soon as data and
+  // link exist), at most once per PUBLISH_INTERVAL_MS minus the jitter tolerance, so the
+  // gateway stays in step with the BMS report clock. Old readings are never repeated.
   if (unsent.isEmpty() && latestThingset.length() &&
-      (!firstPublishDone || millis() - lastPublish >= PUBLISH_INTERVAL_MS) && state == ONLINE) {
+      (!firstPublishDone || millis() - lastPublish >= PUBLISH_INTERVAL_MS - PUBLISH_JITTER_MS) && state == ONLINE) {
     unsent = telemetryJson();
     latestThingset = "";
     lastPublish = millis();

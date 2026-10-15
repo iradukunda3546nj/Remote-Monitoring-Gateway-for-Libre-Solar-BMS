@@ -20,9 +20,16 @@
 #define MQTT_HOST "test.mosquitto.org"
 #define MQTT_PORT 1883
 
-// Demo rate: one telemetry message every 2 minutes (the simulator also reports every 2 min).
-//   720 msgs/day x ~0.4 kB + keep-alive pings = roughly 15 MB per month on the SIM.
-#define PUBLISH_INTERVAL_MS 120000UL
+// Publish rate. Demo: 30 s, so the pipeline is visibly live within seconds (the simulator
+// reports every 30 s too). Deployment: 120000UL (2 min).
+//   30 s:  2,880 msgs/day x ~0.5 kB on the wire = roughly 45 MB per month on the SIM (estimate)
+//   120 s:   720 msgs/day                      = roughly 15 MB per month (estimate)
+#define PUBLISH_INTERVAL_MS 30000UL
+// Each BMS report is published as soon as it arrives, provided at least
+// PUBLISH_INTERVAL_MS - PUBLISH_JITTER_MS has passed since the last publish. The tolerance
+// absorbs serial/USB timing jitter, so a report every 30 s is never skipped and goes out
+// within milliseconds of arriving (the gateway follows the BMS clock, not its own).
+#define PUBLISH_JITTER_MS 5000UL
 
 // MQTT keep-alive: the network path drops idle TCP connections after ~60 s
 // (measured: publishes after a 120 s idle gap got no PUBACK). 45 s keeps the
