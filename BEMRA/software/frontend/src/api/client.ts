@@ -47,7 +47,11 @@ export function buildUrl(path: string, query?: Query, base = API_BASE_URL): stri
 export async function getJson<T>(path: string, query?: Query, signal?: AbortSignal, base?: string): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(buildUrl(path, query, base), { headers: { Accept: 'application/json' }, signal });
+    const apiKey = import.meta.env.VITE_API_KEY;
+    res = await fetch(buildUrl(path, query, base), {
+      headers: { Accept: 'application/json', ...(apiKey ? { 'X-API-Key': apiKey } : {}) },
+      signal,
+    });
   } catch (err) {
     if ((err as Error).name === 'AbortError') throw new ApiError('aborted', 'Request cancelled');
     throw new ApiError('network', `Backend unreachable at ${API_ORIGIN}`);
