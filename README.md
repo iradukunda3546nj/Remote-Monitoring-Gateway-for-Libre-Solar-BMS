@@ -149,7 +149,7 @@ flowchart LR
     subgraph SITE["Battery site"]
         BMS["Libre Solar BMS C1<br/><i>or Python simulator</i>"]
         GW["LILYGO T-Call<br/>ESP32 + SIM800L"]
-        BMS -- "ThingSet text mode<br/>UART 115200 8N1<br/>#mLive {&quot;Meas&quot;:…}" --> GW
+        BMS -- "ThingSet text mode<br/>UART 115200 8N1<br/>mLive reports" --> GW
     end
 
     GW -- "GPRS (Airtel 2G)<br/>MQTT 3.1.1, QoS 1<br/>every 120 s" --> BROKER
